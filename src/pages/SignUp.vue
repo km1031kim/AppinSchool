@@ -2,16 +2,16 @@
   <div id="q-app" style="min-height: 100vh;" class="mystyle">
   <div class="q-pa-md">
     <div class="q-gutter-md" style="max-width: 500px" ref="inputWidth">
-        <div class="Login">Register</div>
+         <div class="Login">Register</div>    
          <q-input v-model="name" filled type="name"  label="Name" ></q-input>
         <q-select
         filled
-        v-model="model"
+        v-model="sex"
         :options="options"
         label="Sex"
         emit-value
       ></q-select>  
-          <q-input v-model="email" filled type="email"  label="Email" ></q-input>
+          <q-input v-model="email" filled type="email"  label="Email"  ></q-input>
            <q-input v-model="password" filled :type="isPwd ? 'password' : 'text'" label="type your password">
         <template v-slot:append>
           <q-icon
@@ -31,7 +31,7 @@
         </template>
       </q-input>
       <q-checkbox class="my-checkbox" v-model="right" label="I agree with your Personal Credit Information Usage Agreement "></q-checkbox><br>
-      <q-btn @click="Register" color="primary" label="Register!"
+      <q-btn @click="register" color="primary" label="Register!"
       :style="{width : btnWidth+'px'}" /><br>
 
       <div class="GoHome">
@@ -42,7 +42,7 @@
         unelevated
         to="/"
         label="Go Home"
-        
+
        
        />
        </div>      
@@ -53,7 +53,9 @@
 
 
 <script>
+import { auth } from 'src/boot/firebase'
 import { defineComponent, ref } from 'vue';
+import { useQuasar } from 'quasar'
 
 export default defineComponent({
    mounted(){
@@ -61,24 +63,12 @@ export default defineComponent({
     console.log(this.btnWidth);
 
   },
-  setup(){
-   const Register = () => {
-    
-  }
 
-   const btnWidth = ref('')
 
-    return {
-       email:ref(''),
-       name:ref(''),
-       password:ref(''),
-       passwordAgain:ref(''),
-       isPwd: ref(true),
-       btnWidth,
-       Register,
-       left: ref(true),
-       right: ref(false),
-       model: ref(null),options: [
+  data(){
+    return{
+      name:"",
+      sex: null,options: [
         {
           label: 'Male',
           value: 'Male',       
@@ -87,9 +77,117 @@ export default defineComponent({
           label: 'Female',
           value: 'Female'
         }
-      ]
-    }  
+      ],
+      email:"",
+      password:"",
+      passwordAgain:"",
+      left: true,
+      right: false,
+      isPwd:true,
+      btnWidth: '',
+      reg: /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,24}))$/
+
     }
+  },
+
+  methods: {
+    isEmailValid() {
+      if (this.reg.test(this.email) == true){
+        return true
+      } else return false
+    }, 
+    isPwdValid() {
+      if(this.password.length < 6) {
+        this.$q.notify({
+        position: "top",
+        message: "비밀번호는 6자 이상이어야 합니다. .",
+        color: "red",
+        type: "negative",
+    }) 
+    return false      
+      } else { 
+        if (this.password != this.passwordAgain ){
+        this.$q.notify({
+        position: "top",
+        message: "두 비밀번호가 같지 않습니다.",
+        color: "red",
+        type: "negative",
+    })           
+       return false 
+      } else return true
+      }
+    },
+    
+    signUp(){
+       auth
+        .createUserWithEmailAndPassword(this.email, this.password)
+        .then((userCredential) => {
+          var user = userCredential.user;
+          console.log("success", user.email);
+          this.$q.notify({
+            position: "top",
+            message: "SignUp Success",
+            color: "blue",
+            type: "positive",
+          });
+          this.$router.push({ path: "/" });
+        })
+        .catch((error) => {
+          var errorCode = error.code;
+          var errorMessage = error.message;
+          this.$q.notify({
+            position: "top",
+            message: errorMessage,
+            color: "red",
+            type: "negative",
+          });
+        });
+    },
+
+    register(){     
+      if (!this.name) {
+        this.$q.notify({
+        position: "top",
+        message: "이름을 입력해주세요",
+        color: "red",
+        type: "negative",
+    })        
+    } else if (!this.sex) {
+     this.$q.notify({
+        position: "top",
+        message: "성별을 선택해주세요",
+        color: "red",
+        type: "negative",
+    }) 
+    } else if (!this.email) {     
+     this.$q.notify({
+        position: "top",
+        message: "이메일을 입력해주세요",
+        color: "red",
+        type: "negative",
+      }) 
+    } else if (!this.isEmailValid()){
+       this.$q.notify({
+        position: "top",
+        message: "이메일 형식으로 입력해주세요",
+        color: "red",
+        type: "negative",
+      }) 
+    }
+    else if (!this.isPwdValid()) {
+    }
+    else if (!this.right){
+        this.$q.notify({
+        position: "top",
+        message: "약관에 동의해주세요",
+        color: "red",
+        type: "negative",
+      })       
+    } else this.signUp()    
+
+     }
+   }
+ 
   }
 )
 
