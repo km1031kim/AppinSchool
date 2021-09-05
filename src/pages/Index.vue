@@ -73,6 +73,7 @@ export default defineComponent({
 
     
     return {
+    
     userEmail:"",
     password:"",
     isPwd:true,
@@ -84,21 +85,33 @@ export default defineComponent({
   },
 
   methods: {
-
-   login(){     
-      auth.signInWithEmailAndPassword(this.userEmail, this.password)
+  
+ 
+   login(){          
+     auth.signInWithEmailAndPassword(this.userEmail, this.password)
   .then((userCredential) => {
+    
 
     // Signed in
-    var user = userCredential.user;
-    console.log("success")
+   var user = userCredential.user  
+   
+   
+   console.log("commit user", user)
+  
+   console.log("success")
+    
     this.$q.notify({
         position: "top",
         message: "Login Success",
         color: "blue",
         type: "positive",
     })
+  
+    
     this.$router.push({ path: "UserMain" });
+    this.$store.commit("setFireUser", user)
+    //this.setFireUser(state, user)
+   
 
     // ...
   })
