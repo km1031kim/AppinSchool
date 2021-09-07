@@ -38,18 +38,7 @@
         no-caps
       />
     </div>
-  <!--
-  <div class="header">
 
-  <router-link to="/SignUp">
-  <center>Join Us!</center>
-  </router-link>
-  <router-link to="/forgetPwd">
-  <center>Forget your password?</center>
-  </router-link>
- 
-  </div>
-  -->
      
   </div>  
 </div>
@@ -93,27 +82,20 @@ export default defineComponent({
     
 
     // Signed in
-   var user = userCredential.user  
-   
-   
-   console.log("commit user", user)
-  
-   console.log("success")
-    
+   var user = userCredential.user     
+   console.log("commit user", user)  
+   console.log("success")    
     this.$q.notify({
         position: "top",
         message: "Login Success",
         color: "blue",
         type: "positive",
-    })
-  
+    })  
     
     this.$router.push({ path: "UserMain" });
     this.$store.commit("setFireUser", user)
     //this.setFireUser(state, user)
    
-
-    // ...
   })
   .catch((error) => {
     var errorCode = error.code;

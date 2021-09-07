@@ -53,7 +53,7 @@
 
 
 <script>
-import { auth } from 'src/boot/firebase'
+import { auth, db } from 'src/boot/firebase'
 import { defineComponent, ref } from 'vue';
 import { useQuasar } from 'quasar'
 
@@ -91,11 +91,13 @@ export default defineComponent({
   },
 
   methods: {
+    // 이메일 형식 검사
     isEmailValid() {
       if (this.reg.test(this.email) == true){
         return true
       } else return false
     }, 
+    // 비밀번호 규칙 검사
     isPwdValid() {
       if(this.password.length < 6) {
         this.$q.notify({
@@ -118,8 +120,9 @@ export default defineComponent({
       }
     },
     
+    // 회원가입
     signUp(){
-       auth
+       auth // 성공 시 then 안으로 들어옴.
         .createUserWithEmailAndPassword(this.email, this.password)
         .then((userCredential) => {
           var user = userCredential.user;
@@ -129,7 +132,27 @@ export default defineComponent({
             message: "SignUp Success",
             color: "blue",
             type: "positive",
-          });
+          })
+          // db에 신규유저정보 입력
+         db.collection("users").add({
+           email: this.email,
+           name: this.name,
+           sex: this.sex           
+         })
+         .then((docRef) => {
+           console.log("Document written with ID: ",docRef.id);
+           $q.notify({
+             message: "Register Success",
+             color: 'blue'
+           })
+         })
+         .catch((error) => {
+           console.error("Error adding document: ", error);
+           $q.notify({
+             message: error,
+             color: 'red'
+           })
+         })
           this.$router.push({ path: "/" });
         })
         .catch((error) => {
@@ -144,6 +167,7 @@ export default defineComponent({
         });
     },
 
+    // 신규 회원정보 입력
     register(){     
       if (!this.name) {
         this.$q.notify({

@@ -3,60 +3,60 @@
 <div id="q-app" style="min-height: 100vh;" class="mystyle">
   <div class="q-pa-md">
     <div class="q-gutter-md" style="max-width: 500px" ref="inputwidth" >
-     새로고침 해보세요! {{userEmail}}
+    Hi {{userName}} {{userEmail}}    
     </div>     
   </div>  
 </div>
   
 </template>
-
 <script>
-import { auth } from 'src/boot/firebase'
+import { auth, db } from 'src/boot/firebase'
 import { defineComponent, ref } from 'vue';
 import { useQuasar } from 'quasar'
 import { mapActions, mapGetters} from 'vuex'
   
 export default defineComponent({
-    created() {
-        auth.onAuthStateChanged((user) => {
-            if (user) {              
-                console.log('User is logined', user);
-                console.log("auth.currentUser",auth.currentUser)
-                this.userEmail = auth.currentUser.email
-                this.getFireUser
-                // update data or vuex state
-            } else {
-                console.log('User is not logged in.');
-            }
-        });
-    },
+
+  updated(){       
+     console.log("update called")
+  },
+  
   mounted(){ 
   // user가 없는 경우 초기에 null이 들어온다.
   // authAction 안에 있는 onAuthStateChanged를 통하여 currentUser 호출이 가능
+  auth.onAuthStateChanged((user) => {
+      if (user) {              
+          console.log('User is logined', user);
+          this.$store.commit("setFireUser", user)
+          this.userEmail = this.getFireUser.email
+          // update data or vuex state
+      } else {  
+          console.log('User is not logged in.');
+      }
 
-  
-  
- 
-
-  //console.log("user email", this.user.email)
-
-
-
-  
-  
-  
-
+      if(user){
+      db.collection("users").where("email", "==", user.email)
+      .get()
+      .then((querySnapshot) => {        
+        querySnapshot.forEach((doc) => {
+          // doc.data() is never undefined for query doc snapshots
+        console.log(doc.id, " => ", doc.data());
+        this.userName = doc.data().name
+          });
+        })    
+      }     
+    })
+    console.log("mounted called")
    }, 
 
-
-
-  data(){ 
-    
+  data(){    
     
     return {
-    userEmail:''
+    userEmail:'',
+    userName: '',
     }
   },
+
   computed: {
     ...mapGetters(["getFireUser","isUserAuth"])
   },

@@ -23,16 +23,15 @@ export default store(function (/* { ssrContext } */) {
 //  plugins: [createPersistedState({
 //       storage: window.sessionStorage,
 //   })],
-    modules: {
-      // example
-    },
     state: {      
       fireUser:null
     },
+        
     actions: {
       signOutAction({commit}) {
-        auth.signOut().then(() =>{
-          commit("setFireUser", null)
+        auth.signOut()
+          .then(() =>{
+            commit("setFireUser", null)
         })
       },
       authAction({commit}){
