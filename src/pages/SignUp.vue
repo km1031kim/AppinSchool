@@ -127,28 +127,34 @@ export default defineComponent({
         .then((userCredential) => {
           var user = userCredential.user;
           console.log("success", user.email);
+          user.updateProfile({
+            displayName : this.name
+          })
           this.$q.notify({
             position: "top",
             message: "SignUp Success",
             color: "blue",
             type: "positive",
           })
+          
           // db에 신규유저정보 입력
          db.collection("users").add({
            email: this.email,
            name: this.name,
            sex: this.sex           
          })
+        
          .then((docRef) => {
            console.log("Document written with ID: ",docRef.id);
            $q.notify({
              message: "Register Success",
              color: 'blue'
            })
+          
          })
          .catch((error) => {
            console.error("Error adding document: ", error);
-           $q.notify({
+           this.$q.notify({
              message: error,
              color: 'red'
            })

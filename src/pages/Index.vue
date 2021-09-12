@@ -18,7 +18,7 @@
     :style="{width : btnWidth+'px'}" /><br>
        
 
-  <q-checkbox class="my-checkbox" v-model="right" label="Remember Me"></q-checkbox><br>   
+  <q-checkbox class="my-checkbox" v-model="remember" label="Remember your ID"></q-checkbox><br>   
   <q-btn
         class="q-mt-sm"
         color="white"
@@ -53,30 +53,41 @@ import { useQuasar } from 'quasar'
 
 export default defineComponent({
   mounted(){
+    // created mounted updated
     this.btnWidth = this.$refs.inputwidth.clientWidth
     console.log(this.btnWidth);
-  },    
+
+    console.log(this.remember)
+    console.log(localStorage.checkbox)
+
+     if(localStorage.checkbox && localStorage.checkbox !== ""){
+      this.remember = true
+      this.userEmail = localStorage.username
+    } else {
+      this.remember = false
+    }
+
+  
+  
+  },
 
 
   data(){
-
     
     return {
-    
+    remember:'false',
     userEmail:"",
     password:"",
     isPwd:true,
-    btnWidth: '', 
-    right:true,
-    left:false
-
+    btnWidth: ''
     }
   },
 
   methods: {
   
  
-   login(){          
+   login(){     
+     console.log(this.remember)     
      auth.signInWithEmailAndPassword(this.userEmail, this.password)
   .then((userCredential) => {
     
@@ -92,9 +103,23 @@ export default defineComponent({
         type: "positive",
     })  
     
-    this.$router.push({ path: "UserMain" });
+    if (this.remember.value == true) {
+      localStorage.username = this.userEmail.value
+      localStorage.checkbox = this.remember.value
+    } else {
+      localStorage.username = ""
+      localStorage.checkbox = ""
+    }
+    this.$router.push({ path: "UserMain" })
     this.$store.commit("setFireUser", user)
-    //this.setFireUser(state, user)
+    
+      if (this.remember == true) {
+      localStorage.username = this.userEmail
+      localStorage.checkbox = this.remember
+    } else {
+      localStorage.username = ""
+      localStorage.checkbox = ""
+    }
    
   })
   .catch((error) => {

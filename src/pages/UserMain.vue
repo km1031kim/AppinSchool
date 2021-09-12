@@ -3,7 +3,29 @@
 <div id="q-app" style="min-height: 100vh;" class="mystyle">
   <div class="q-pa-md">
     <div class="q-gutter-md" style="max-width: 500px" ref="inputwidth" >
-    Hi {{userName}} {{userEmail}}    
+      <q-card-section class="q-qt-none">
+      Hi <p></p>
+      {{userName}} <p></p>   
+      {{userEmail}} <p></p>
+    </q-card-section>
+       <q-btn
+        class="q-mt-sm"
+        color="white"
+        text-color="blue"
+        unelevated
+        to="/"
+        label="Go Home"
+        no-caps
+      />
+       <q-btn
+        class="q-mt-sm"
+        color="white"
+        text-color="blue"
+        unelevated
+        to="/myInfo"
+        label="My Info"
+        no-caps
+      />
     </div>     
   </div>  
 </div>
@@ -86,6 +108,10 @@ export default defineComponent({
   font-size:20px;
   color:red;
   
+}
+.mystyle2 {
+ 
+  text-align: center;
 }
 
 
