@@ -16,9 +16,19 @@
       </q-input>
         <q-btn @click="login" color="primary" label="Login"
     :style="{width : btnWidth+'px'}" /><br>
-       
-
-  <q-checkbox class="my-checkbox" v-model="remember" label="Remember your ID"></q-checkbox><br>   
+    <q-checkbox class="my-checkbox" v-model="remember" label="Remember your ID"></q-checkbox><br>   
+  
+  
+  <div class="q-gutter-md">
+    <!-- none으로 해야 이미지 넣기 좋다 -->
+    <q-btn padding="none" flat>
+      <img src="../assets/google.png" style="width: 200px;" @click="googleLogin">
+    </q-btn>
+    <q-btn padding="none" flat>
+      <img src="../assets/github.png" style="width: 200px;" @click="githubLogin">
+    </q-btn>
+  </div>
+  
   <q-btn
         class="q-mt-sm"
         color="white"
@@ -37,16 +47,14 @@
         label="Forget your password?"
         no-caps
       />
-    </div>
-
-     
+    </div>    
   </div>  
 </div>
   
 </template>
 
 <script>
-import { auth } from 'src/boot/firebase'
+import { auth, g_auth, db } from 'src/boot/firebase'
 import { defineComponent, ref } from 'vue';
 import { useQuasar } from 'quasar'
 
@@ -66,14 +74,9 @@ export default defineComponent({
     } else {
       this.remember = false
     }
-
-  
-  
   },
 
-
-  data(){
-    
+  data(){    
     return {
     remember:'false',
     userEmail:"",
@@ -84,12 +87,81 @@ export default defineComponent({
   },
 
   methods: {
+    githubLogin(){
+     var provider = new g_auth.GithubAuthProvider();
+     auth.languageCode = 'kr_KR'
+     auth
+      .signInWithPopup(provider)
+      .then((result) => {
+        var user = result.user;
+        console.log("git user >>>", user.email)
+        this.$store.commit("setFireUser", user)
+        db.collection("users").where("email","==",user.email).get()
+        .then((snapshot) => {
+           
+          if(snapshot.empty == true ){
+          // 처음 들어온 값인 경우
+          db.collection("users").add({
+            email: user.email,
+            name : user.displayName
+            })
+          } else {
+            // 있는 값인 경우 snapshot.forEach를 통해 docID(문서 id)를 가져온다
+            console.log("git snapshot >>", snapshot)
+            snapshot.forEach((doc) => {
+              db.collection("users").doc(doc.id).set({
+              email: user.email,
+              name : user.displayName
+             })
+            })      
+          }
+        })
+      this.$router.push({ path: "UserMain" })  
+      }).catch((error) => {
+        console.log(error)
+      }); 
+
+    },
+    googleLogin(){
+     var provider = new g_auth.GoogleAuthProvider();
+     auth.languageCode = 'kr_KR'
+     auth
+      .signInWithPopup(provider)
+      .then((result) => {
+        var user = result.user;
+        console.log("user >>>", user.email)
+        this.$store.commit("setFireUser", user)
+        db.collection("users").where("email","==",user.email).get()
+        .then((snapshot) => {
+           
+          if(snapshot.empty == true ){
+          // 처음 들어온 값인 경우
+          db.collection("users").add({
+            email: user.email,
+            name : user.displayName
+            })
+          } else {
+            // 있는 값인 경우 snapshot.forEach를 통해 docID(문서 id)를 가져온다
+            console.log("else snapshot >>", snapshot)
+            snapshot.forEach((doc) => {
+              db.collection("users").doc(doc.id).set({
+              email: user.email,
+              name : user.displayName
+             })
+            })      
+          }
+        })
+      this.$router.push({ path: "UserMain" })  
+      }).catch((error) => {
+        console.log(error)
+      });
+    },
   
  
    login(){     
      console.log(this.remember)     
      auth.signInWithEmailAndPassword(this.userEmail, this.password)
-  .then((userCredential) => {
+      .then((userCredential) => {
     
 
     // Signed in
